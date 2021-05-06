@@ -1,14 +1,11 @@
 class Url < ApplicationRecord
   validates :long_url, presence: true, length: { minimum: 30}
-  before_create :generate_short_url, :sanitize
-  
+  before_create :generate_short_url
+
   def generate_short_url
-    str = "www.mylink/"
-    str = str + rand(36**8).to_s(36)
-  end
-  def sanitize
-    long_url.strip!
-    sanitize_url = self.long_url.downcase.gsub(/(https?:\/\/)|(www\.)/,"")
-    "http://#{sanitize_url}"
+    # I created account in bitly website and generated an access token
+    client = Bitly::API::Client.new(token:'6eb07de282f141e42e7503b2131732e1768f9c57')
+    bitlink = client.shorten(long_url: long_url)
+    return bitlink.link
   end
 end
